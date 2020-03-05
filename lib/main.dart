@@ -15,6 +15,8 @@ class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
 
   List _toDoList = [];
+  Map<String, dynamic> _lastRemoved;
+  int _lastRemovedPos;
   
   @override
   void initState() {
@@ -99,6 +101,32 @@ class _HomeState extends State<Home> {
           _saveData();
         },
       ),
+      onDismissed: (direction) {
+        setState(() {
+          _lastRemoved = Map.from(_toDoList[index]);
+          _lastRemovedPos = index;
+          _toDoList.removeAt(index);
+        });
+
+        _saveData();
+
+        final snackbar = SnackBar(
+          content: Text("Task \"${_lastRemoved["title"]}\" removed."),
+          action: SnackBarAction(
+            label: "Undo",
+            onPressed: () {
+              setState(() {
+                _toDoList.insert(_lastRemovedPos, _lastRemoved);
+              });
+
+              _saveData();
+            },
+          ),
+          duration: Duration(seconds: 2),
+        );
+
+        Scaffold.of(context).showSnackBar(snackbar);
+      },
     );
   }
 
